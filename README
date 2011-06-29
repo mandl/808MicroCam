@@ -1,0 +1,28 @@
+Upload sample code
+Try at your own risk.
+
+Compile the sample:
+
+as31 blink.asm
+
+Convert the hex File to BIN
+
+avr-objcopy -I ihex -O binary blink.hex blink.bin
+
+Press the mode button and connect the cam to usb.
+
+lsusb
+
+Now the Cam is in webcam mode
+
+ID 04fc:1528 Sunplus Technology Co., Ltd SPCA1527A/SPCA1528 SD card camera (webcam mode)
+
+Upload the code ( Wrong code can destroy your Cam !!!)
+
+ISP808
+
+Yes. Now the Led will blink. We loaded our first code in your Cam.
+
+Disconnect the cam from USB
+
+Press Reset.
