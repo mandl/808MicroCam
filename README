@@ -1,5 +1,21 @@
+The project goal is to develop an open souce firmware for the 808 Micro Camera. 
+
+For my development i use Ubuntu Linux Version 10.10
+
+The 808 Cam uses an Sunplus SPCA1527 Chip
+
+http://www.chucklohr.com/808/C3/index.html
+
+Tools we use.
+
+The 8051 Assembler ( as31
+
+http://www.pjrc.com/tech/8051/
+
 Upload sample code
 Try at your own risk.
+
+
 
 Compile the sample:
 
