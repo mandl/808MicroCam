@@ -1,5 +1,5 @@
 /*
-  * This program is free software; you can redistribute it and/or modify it
+ * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License (either version 2 or
  * version 3) as published by the Free Software Foundation.
  *
@@ -17,9 +17,8 @@
  */
 
 
-// This is just a fast hack for demo usage
+// Use at your own risk.
 
-// Use at your own risk. 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -159,29 +158,46 @@ int bulk_write(int endpoint, unsigned char *buf, int length) {
 int main(int argc, char **argv) {
 
 	FILE *pFile = NULL;
-	char * buffer;
 
-	unsigned char buf[0x5000];
-	unsigned char buf2[300];
-
-	memset(buf2, 0, 300);
 	int size;
 	long lSize;
 
-	pFile = fopen("blink.bin", "rb");
+	unsigned char *buffer;
+	unsigned char *buf2 = calloc(300, sizeof(unsigned char));
+
+	if (argc < 2) {
+		fprintf(stderr, "Missing upload filename \n\n");
+		fprintf(stderr, "Usage: \n");
+		fprintf(stderr, "ISP808 <uploadfile> \n");
+		exit(1);;
+	}
+	pFile = fopen(argv[1], "rb");
+
+	if (pFile == NULL) {
+		fprintf(stderr, "ERROR: Unable to open file %s \n", argv[1]);
+		exit(1);
+	}
 
 	// obtain file size:
 	fseek(pFile, 0, SEEK_END);
 	lSize = ftell(pFile);
 	rewind(pFile);
 
+
+
 	// allocate memory to contain the whole file:
-	 buffer = (char*) malloc (sizeof(char)*lSize);
-	 if (buffer == NULL) {fputs ("Memory error",stderr); exit (2);}
+	buffer = calloc(lSize, sizeof(unsigned char));
 
-	 size = fread(buf, 1, lSize, pFile);
-	 if (size != lSize) {fputs ("Reading error",stderr); exit (3);}
+	if (buffer == NULL) {
+		fputs("Memory error", stderr);
+		exit(2);
+	}
 
+	size = fread(buffer, 1, lSize, pFile);
+	if (size != lSize) {
+		fputs("Reading error", stderr);
+		exit(3);
+	}
 
 	libusb_context *context;
 	libusb_init(&context);
@@ -192,6 +208,8 @@ int main(int argc, char **argv) {
 	if (!device_handle) {
 		fprintf(stderr, "ERROR: Unable to find device "
 			"(Vendor ID = %04x, Product ID = %04x)\n", VID, PID);
+		fprintf(stderr, "Press the Mode Button and connect the cam to USB \n");
+
 		return 1;
 	}
 	libusb_claim_interface(device_handle, 2);
@@ -200,10 +218,14 @@ int main(int argc, char **argv) {
 
 	usleep(100);
 
-	// Get the installes version
+	// Get the installed version
+
+	fprintf(stdout, "\nRead 808 Version \n");
 	GetVersion();
 	GetVersion1();
 	GetVersion2();
+
+	fprintf(stdout, "\nStart Uploading the file: %s \n",argv[1]);
 
 	char defout[] = { 0x00, 0x80, 0x04, 0x00, 0x2d, 0x10, 0x00, 0x00 };
 
@@ -213,11 +235,13 @@ int main(int argc, char **argv) {
 
 	control_out(0xfd, 0, 0x4f3, defout, 8);
 
-	usleep(200);
+	usleep(200); // Fix me
 
 	// Download the code
 
-	bulk_write(3, buf, lSize);
+	fprintf(stdout, "\nDownload Code.... \n");
+
+	bulk_write(3, buffer, lSize);
 	usleep(200);
 
 	char defout2[] = { 0x00, 0x80, 0x04, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00,
@@ -227,15 +251,16 @@ int main(int argc, char **argv) {
 
 	usleep(100);
 
-	// Dont know
+	// Dont know why
 	bulk_write(3, buf2, 256);
 
+	fprintf(stdout, "\nDownload Ready.... \n");
 	usleep(100);
 
 	if (pFile)
 		fclose(pFile);
 
-	free (buffer);
+	free(buffer);
 
 	libusb_release_interface(device_handle, 0);
 	libusb_close(device_handle);

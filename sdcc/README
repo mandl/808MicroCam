@@ -1,0 +1,18 @@
+
+SDCC (Small Device C Compiler )
+
+Sample Code in C
+
+
+blink.c   The Led will blink
+
+rtc.c     Set the internel RTC and fire an Alarm.
+
+
+How to compile:
+
+
+make
+
+upload
+
